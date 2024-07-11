@@ -1,5 +1,7 @@
 #include <htpp.hpp>
 #include <client.hpp>
+#include <array>
+#include <iostream>
 #include <sys/socket.h>
 
 htpp::htpp::htpp(const htpp_builder &builder)
@@ -50,13 +52,26 @@ void htpp::htpp::run()
     });
 
     socklen_t address_len = sizeof(m_address);
+    constexpr size_t connector_count = 1;
+    std::array<std::thread, connector_count> connectors;
 
-    while(true)
+    for(size_t i = 0; i < connector_count; ++i)
     {
-        int32_t client_socket_fd = accept(m_socket_fd, (sockaddr *)&m_address, &address_len);
-        client *new_client = new client(*this, client_socket_fd);
+        connectors[i] = std::thread([this, &address_len]() -> void
+        {
+            while(true)
+            {
+                int32_t client_socket_fd = accept(m_socket_fd, (sockaddr *)&m_address, &address_len);
+                client *new_client = new client(*this, client_socket_fd);
 
-        new_client->run();
+                new_client->run();
+            }
+        });
+    }
+
+    for(size_t i = 0; i < connector_count; ++i)
+    {
+        connectors[i].join();
     }
 }
 
