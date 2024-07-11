@@ -1,7 +1,6 @@
 #include <htpp.hpp>
 #include <client.hpp>
 #include <sys/socket.h>
-#include <iostream>
 
 htpp::htpp::htpp(const htpp_builder &builder)
 {
@@ -52,8 +51,6 @@ void htpp::htpp::run()
 
     socklen_t address_len = sizeof(m_address);
 
-    std::clog << "Listening to requests on port " << m_port << "..." << std::endl;
-
     while(true)
     {
         int32_t client_socket_fd = accept(m_socket_fd, (sockaddr *)&m_address, &address_len);
@@ -63,14 +60,19 @@ void htpp::htpp::run()
     }
 }
 
-int32_t htpp::htpp::get_socket_fd() const
+const int32_t &htpp::htpp::get_socket_fd() const
 {
     return m_socket_fd;
 }
 
-size_t htpp::htpp::get_max_request_size() const
+const size_t &htpp::htpp::get_max_request_size() const
 {
     return m_max_request_size;
+}
+
+const std::filesystem::path &htpp::htpp::get_docroot() const
+{
+    return m_docroot;
 }
 
 void htpp::htpp::enqueue_dead_connection(client *dead_client)

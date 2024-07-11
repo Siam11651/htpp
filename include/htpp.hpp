@@ -38,8 +38,9 @@ namespace htpp
     public:
         htpp(const htpp_builder &builder);
         void run();
-        int32_t get_socket_fd() const;
-        size_t get_max_request_size() const;
+        const int32_t &get_socket_fd() const;
+        const size_t &get_max_request_size() const;
+        const std::filesystem::path &get_docroot() const;
         void enqueue_dead_connection(client *dead_client);
     };
 }
