@@ -8,6 +8,7 @@
 #include <queue>
 #include <netinet/in.h>
 #include <mutex>
+#include <semaphore>
 
 namespace htpp
 {
@@ -32,6 +33,7 @@ namespace htpp
         int32_t m_socket_fd;
         sockaddr_in m_address;
         std::mutex m_dead_connecion_mutex;
+        std::counting_semaphore<0> m_cleaner_semaphore;
         std::queue<client *> m_dead_connections;
         std::thread m_cleaner;
 

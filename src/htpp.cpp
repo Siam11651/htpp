@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sys/socket.h>
 
-htpp::htpp::htpp(const htpp_builder &builder)
+htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
 {
     m_port = builder.port;
     m_max_listen_queue = builder.max_listen_queue;
@@ -32,6 +32,7 @@ void htpp::htpp::run()
     {
         while(true)
         {
+            m_cleaner_semaphore.acquire();
             m_dead_connecion_mutex.lock();
 
             if(m_dead_connections.size() > 0)
@@ -46,8 +47,6 @@ void htpp::htpp::run()
             }
 
             m_dead_connecion_mutex.unlock();
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(250));    // doing this to avoid race :3
         }
     });
 
@@ -95,4 +94,5 @@ void htpp::htpp::enqueue_dead_connection(client *dead_client)
     m_dead_connecion_mutex.lock();
     m_dead_connections.push(dead_client);
     m_dead_connecion_mutex.unlock();
+    m_cleaner_semaphore.release();
 }
