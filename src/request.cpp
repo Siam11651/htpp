@@ -5,6 +5,11 @@
 
 bool htpp::request::is_interger(const std::string_view &query) const
 {
+    if(query.size() == 0)
+    {
+        return false;
+    }
+
     for(const char &c : query)
     {
         if(!('0' <= c && c <= '9'))
@@ -87,15 +92,14 @@ htpp::request::request(const std::string_view &message)
     {
         m_method = method::TRACE;
     }
-    else if(request_line_components[0] == "CONNECT")
-    {
-        m_method = method::CONNECT;
-    }
     else
     {
-        m_method = method::EXTENSION;
-        m_extension_method = request_line_components[0];
+        m_healthy = false;
+
+        return;
     }
+
+    m_route = route(request_line_components[1]);
 
     {
         const size_t version_slash_pos = request_line_components[2].find("/");

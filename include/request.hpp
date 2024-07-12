@@ -1,6 +1,7 @@
 #ifndef REQUEST_H
 #define REQUEST_H
 
+#include <route.hpp>
 #include <string>
 
 namespace htpp
@@ -16,9 +17,7 @@ namespace htpp
             POST,
             PUT,
             DELETE,
-            TRACE,
-            CONNECT,
-            EXTENSION
+            TRACE
         };
 
     private:
@@ -27,6 +26,7 @@ namespace htpp
         std::string_view m_extension_method;
         std::string_view m_http_major;
         std::string_view m_http_minor;
+        route m_route;
 
         bool is_interger(const std::string_view &query) const;
 
