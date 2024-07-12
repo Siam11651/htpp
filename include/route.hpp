@@ -12,8 +12,9 @@ namespace htpp
         static const std::string s_segment_symbols;
         bool m_healthy = true;
         std::vector<std::string> m_segements;
+        std::string m_query;
 
-        bool is_valid_segment(const std::string &segment) const;
+        bool is_valid_segment(const std::string_view &segment) const;
     
     public:
         route(const std::string &route = "*");

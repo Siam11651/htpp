@@ -1,9 +1,11 @@
 #include <route.hpp>
 #include <list>
+#include <ranges>
+#include <iostream>
 
 const std::string htpp::route::s_segment_symbols("-._~!$&'()*+,;=");
 
-bool htpp::route::is_valid_segment(const std::string &segment) const
+bool htpp::route::is_valid_segment(const std::string_view &segment) const
 {
     const size_t &size = segment.size();
 
@@ -42,8 +44,6 @@ bool htpp::route::is_valid_segment(const std::string &segment) const
 htpp::route::route(const std::string &route)
 {
     std::string temp_route(route);
-    std::string fragment;
-    std::string query;
     std::string path;
 
     {
@@ -51,7 +51,6 @@ htpp::route::route(const std::string &route)
 
         if(frag_pos != std::string::npos)
         {
-            fragment = temp_route.substr(frag_pos + 1);
             temp_route = temp_route.substr(0, frag_pos);
         }
     }
@@ -61,38 +60,23 @@ htpp::route::route(const std::string &route)
 
         if(query_pos != std::string::npos)
         {
-            query = temp_route.substr(query_pos + 1);
+            m_query = temp_route.substr(query_pos + 1);
             temp_route = temp_route.substr(0, query_pos);
         }
     }
 
     {
-        std::list<std::string> segments_list;
-        size_t start = 0;
-        bool run = true;
-
-        while(run)
-        {
-            size_t pos = temp_route.find("/", start);
-
-            if(pos == std::string::npos)
-            {
-                pos = temp_route.size();
-                run = false;
-            }
-
-            segments_list.push_back(temp_route.substr(start, pos - start));
-        }
-
         m_segements.clear();
 
-        for(std::list<std::string>::const_iterator it = segments_list.cbegin(); it != segments_list.cend(); ++it)
+        for(const auto segment : std::views::split(temp_route, std::string("/")))
         {
-            if(it->size() > 0)
+            const std::string_view segment_view(segment.data(), segment.size());
+
+            if(!segment_view.empty())
             {
-                if(is_valid_segment(*it))
+                if(is_valid_segment(segment_view))
                 {
-                    m_segements.push_back(*it);
+                    m_segements.push_back(std::string(segment_view.data(), segment_view.size()));
                 }
                 else
                 {

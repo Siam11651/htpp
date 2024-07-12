@@ -1,7 +1,5 @@
 #include <request.hpp>
-#include <ranges>
 #include <vector>
-#include <iostream>
 
 bool htpp::request::is_interger(const std::string &query) const
 {
