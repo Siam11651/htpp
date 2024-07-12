@@ -32,6 +32,8 @@ namespace htpp
 
     public:
         request(const std::string &message);
+        const route &get_route() const;
+        const bool is_valid() const;
     };
 }
 

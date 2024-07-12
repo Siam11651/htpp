@@ -18,6 +18,7 @@ namespace htpp
     
     public:
         route(const std::string &route = "*");
+        const std::string get_path() const;
     };
 }
 

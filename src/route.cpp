@@ -86,3 +86,22 @@ htpp::route::route(const std::string &route)
         }
     }
 }
+
+const std::string htpp::route::get_path() const
+{
+    if(m_segements.empty())
+    {
+        return "/";
+    }
+    else
+    {
+        std::string to_return;
+
+        for(const std::string &segment : m_segements)
+        {
+            to_return += "/" + segment;
+        }
+
+        return to_return;
+    }
+}

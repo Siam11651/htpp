@@ -134,3 +134,13 @@ htpp::request::request(const std::string &message)
         }
     }
 }
+
+const htpp::route &htpp::request::get_route() const
+{
+    return m_route;
+}
+
+const bool htpp::request::is_valid() const
+{
+    return m_healthy;
+}
