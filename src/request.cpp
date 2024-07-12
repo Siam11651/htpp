@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 
-bool htpp::request::is_interger(const std::string_view &query) const
+bool htpp::request::is_interger(const std::string &query) const
 {
     if(query.size() == 0)
     {
@@ -21,20 +21,20 @@ bool htpp::request::is_interger(const std::string_view &query) const
     return true;
 }
 
-htpp::request::request(const std::string_view &message)
+htpp::request::request(const std::string &message)
 {
-    std::string_view temp_message(message);
+    std::string temp_message(message);
     const size_t request_line_end_pos = temp_message.find("\r\n");
 
-    if(request_line_end_pos == std::string_view::npos)
+    if(request_line_end_pos == std::string::npos)
     {
         m_healthy = false;
 
         return;
     }
     
-    const std::string_view request_line(temp_message.substr(0, request_line_end_pos + 1));
-    std::vector<std::string_view> request_line_components(3);
+    const std::string request_line(temp_message.substr(0, request_line_end_pos + 1));
+    std::vector<std::string> request_line_components(3);
 
     {
         size_t next_component = 0;
@@ -45,7 +45,7 @@ htpp::request::request(const std::string_view &message)
         {
             size_t pos = request_line.find(" ", start);
 
-            if(pos == std::string_view::npos)
+            if(pos == std::string::npos)
             {
                 run = false;
                 pos = request_line.size();
@@ -104,7 +104,7 @@ htpp::request::request(const std::string_view &message)
     {
         const size_t version_slash_pos = request_line_components[2].find("/");
 
-        if(version_slash_pos == std::string_view::npos)
+        if(version_slash_pos == std::string::npos)
         {
             m_healthy = false;
 
@@ -113,7 +113,7 @@ htpp::request::request(const std::string_view &message)
 
         const size_t version_dot_pos = request_line_components[2].find(".");
 
-        if(version_dot_pos == std::string_view::npos)
+        if(version_dot_pos == std::string::npos)
         {
             m_healthy = false;
 

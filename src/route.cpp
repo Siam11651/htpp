@@ -1,9 +1,9 @@
 #include <route.hpp>
 #include <list>
 
-const std::string_view htpp::route::s_segment_symbols("-._~!$&'()*+,;=");
+const std::string htpp::route::s_segment_symbols("-._~!$&'()*+,;=");
 
-bool htpp::route::is_valid_segment(const std::string_view &segment) const
+bool htpp::route::is_valid_segment(const std::string &segment) const
 {
     const size_t &size = segment.size();
 
@@ -30,7 +30,7 @@ bool htpp::route::is_valid_segment(const std::string_view &segment) const
                 return false;
             }
         }
-        else if(!('0' <= c && c <= '9') && !('A' <= c && c <= 'Z') && !('a' <= c && c <= 'z') && s_segment_symbols.find(c) == std::string_view::npos)
+        else if(!('0' <= c && c <= '9') && !('A' <= c && c <= 'Z') && !('a' <= c && c <= 'z') && s_segment_symbols.find(c) == std::string::npos)
         {
             return false;
         }
@@ -39,35 +39,35 @@ bool htpp::route::is_valid_segment(const std::string_view &segment) const
     return true;
 }
 
-htpp::route::route(const std::string_view &route)
+htpp::route::route(const std::string &route)
 {
-    std::string_view temp_route(route);
-    std::string_view fragment;
-    std::string_view query;
-    std::string_view path;
+    std::string temp_route(route);
+    std::string fragment;
+    std::string query;
+    std::string path;
 
     {
         const size_t frag_pos = temp_route.find("#");
 
-        if(frag_pos != std::string_view::npos)
+        if(frag_pos != std::string::npos)
         {
             fragment = temp_route.substr(frag_pos + 1);
-            temp_route.remove_suffix(temp_route.size() - frag_pos);
+            temp_route = temp_route.substr(0, frag_pos);
         }
     }
 
     {
         const size_t query_pos = temp_route.find("?");
 
-        if(query_pos != std::string_view::npos)
+        if(query_pos != std::string::npos)
         {
             query = temp_route.substr(query_pos + 1);
-            temp_route.remove_suffix(temp_route.size() - query_pos);
+            temp_route = temp_route.substr(0, query_pos);
         }
     }
 
     {
-        std::list<std::string_view> segments_list;
+        std::list<std::string> segments_list;
         size_t start = 0;
         bool run = true;
 
@@ -75,7 +75,7 @@ htpp::route::route(const std::string_view &route)
         {
             size_t pos = temp_route.find("/", start);
 
-            if(pos == std::string_view::npos)
+            if(pos == std::string::npos)
             {
                 pos = temp_route.size();
                 run = false;
@@ -86,7 +86,7 @@ htpp::route::route(const std::string_view &route)
 
         m_segements.clear();
 
-        for(std::list<std::string_view>::const_iterator it = segments_list.cbegin(); it != segments_list.cend(); ++it)
+        for(std::list<std::string>::const_iterator it = segments_list.cbegin(); it != segments_list.cend(); ++it)
         {
             if(it->size() > 0)
             {
