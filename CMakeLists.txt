@@ -7,8 +7,10 @@ set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
 set(BUILD_STATIC_LIBS ON CACHE INTERNAL "")
 FetchContent_MakeAvailable(llhttp)
 add_library(htpp
+    "src/client.cpp"
     "src/htpp.cpp"
-    "src/client.cpp")
+    "src/request.cpp"
+    "src/route.cpp")
 target_include_directories(htpp PUBLIC "include")
 target_link_libraries(htpp llhttp_static)
 set_property(TARGET htpp PROPERTY CXX_STANDARD 20)
