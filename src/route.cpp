@@ -65,25 +65,23 @@ htpp::route::route(const std::string &route)
         }
     }
 
+    m_segements.clear();
+
+    for(const auto &segment : std::views::split(temp_route, std::string("/")))
     {
-        m_segements.clear();
+        const std::string_view segment_view(segment.data(), segment.size());
 
-        for(const auto segment : std::views::split(temp_route, std::string("/")))
+        if(!segment_view.empty())
         {
-            const std::string_view segment_view(segment.data(), segment.size());
-
-            if(!segment_view.empty())
+            if(is_valid_segment(segment_view))
             {
-                if(is_valid_segment(segment_view))
-                {
-                    m_segements.push_back(std::string(segment_view.data(), segment_view.size()));
-                }
-                else
-                {
-                    m_healthy = false;
+                m_segements.push_back(std::string(segment_view.data(), segment_view.size()));
+            }
+            else
+            {
+                m_healthy = false;
 
-                    return;
-                }
+                return;
             }
         }
     }

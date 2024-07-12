@@ -1,5 +1,6 @@
 #include <request.hpp>
 #include <vector>
+#include <ranges>
 
 bool htpp::request::is_interger(const std::string &query) const
 {
@@ -31,30 +32,26 @@ htpp::request::request(const std::string &message)
         return;
     }
     
-    const std::string request_line(temp_message.substr(0, request_line_end_pos + 1));
+    const std::string request_line(temp_message.substr(0, request_line_end_pos));
     std::vector<std::string> request_line_components(3);
 
     {
         size_t next_component = 0;
-        size_t start = 0;
-        bool run = true;
 
-        while(run && next_component < 3)
+        for(const auto &component : std::ranges::views::split(request_line, std::string(" ")))
         {
-            size_t pos = request_line.find(" ", start);
-
-            if(pos == std::string::npos)
+            if(next_component == 3)
             {
-                run = false;
-                pos = request_line.size();
+                m_healthy = false;
+
+                return;
             }
 
-            request_line_components[next_component] = request_line.substr(start, pos - start);
+            request_line_components[next_component] = std::string(component.data(), component.size());
             ++next_component;
-            start = pos + 1;
         }
 
-        if(next_component < 3 || start <= request_line.size())
+        if(next_component < 3)
         {
             m_healthy = false;
 
