@@ -10,6 +10,11 @@ void htpp::route::segment_tree_node::set_handler_get(const handler &&handler_get
     m_handler_get = new handler(handler_get);
 }
 
+const htpp::handler *htpp::route::segment_tree_node::get_handler_get_ptr() const
+{
+    return m_handler_get;
+}
+
 htpp::route::segment_tree_node::~segment_tree_node()
 {
     delete m_handler_get;

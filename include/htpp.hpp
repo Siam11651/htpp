@@ -33,7 +33,7 @@ namespace htpp
         std::filesystem::path m_docroot;
         int32_t m_socket_fd;
         sockaddr_in m_address;
-        route::segment_tree_node *m_route_segment_tree;
+        route::segment_tree_node *m_route_segment_tree_ptr;
         std::mutex m_dead_connecion_mutex;
         std::counting_semaphore<0> m_cleaner_semaphore;
         std::queue<client *> m_dead_connections;
@@ -45,6 +45,7 @@ namespace htpp
         const int32_t &get_socket_fd() const;
         const size_t &get_max_request_size() const;
         const std::filesystem::path &get_docroot() const;
+        const route::segment_tree_node *get_route_segment_tree_ptr() const;
         void enqueue_dead_connection(client *dead_client);
         ~htpp();
     };

@@ -74,11 +74,19 @@ const std::string htpp::response::serialize() const
 
     response_stream << "HTTP/1.1 "<< status_code << " " << s_status_map.at(status_code) << std::endl;
     response_stream << "Date: " << std::put_time(std::gmtime(&now), "%a, %d %b %Y %H:%M:%S GMT") << std::endl;
-    response_stream << "Content-Type: " << content_type << "; charset=utf-8" << std::endl;
     response_stream << "Server: htpp" << std::endl;
-    response_stream << "Content-Length: " << body.size() << std::endl;
-    response_stream << std::endl;
-    response_stream << body << std::endl;
+
+    if(!body.empty())
+    {
+        response_stream << "Content-Type: " << content_type << "; charset=utf-8" << std::endl;
+        response_stream << "Content-Length: " << body.size() << std::endl;
+        response_stream << std::endl;
+        response_stream << body << std::endl;
+    }
+    else
+    {
+        response_stream << std::endl;
+    }
 
     return response_stream.str();
 }

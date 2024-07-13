@@ -30,7 +30,7 @@ namespace htpp
 
     private:
         static const std::string s_segment_symbols;
-        bool m_healthy = true;
+        bool m_valid = true;
         std::vector<route::segment> m_segements;
         std::string m_query;
 
@@ -38,6 +38,7 @@ namespace htpp
     
     public:
         route(const std::string &route = "*");
+        const std::vector<segment> &get_segments() const;
         const std::string get_path() const;
     };
 }

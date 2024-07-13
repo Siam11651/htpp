@@ -34,7 +34,7 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
     bind(m_socket_fd, (sockaddr *)&m_address, sizeof(m_address));
     listen(m_socket_fd, m_max_listen_queue);
 
-    m_route_segment_tree = new route::segment_tree_node();
+    m_route_segment_tree_ptr = new route::segment_tree_node();
 
     if(std::filesystem::exists(m_docroot))
     {
@@ -70,9 +70,10 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
                     }
                 }
 
-                handler index_handler(segments, [](const request &req) -> response
+                handler index_handler(segments, [this](const request &req) -> response
                 {
-                    std::filesystem::path index_path(req.get_route().get_path() + "/index.html");
+                    std::filesystem::path index_path(m_docroot);
+                    index_path += std::filesystem::path(req.get_route().get_path() + "/index.html");
                     std::ifstream index_stream(index_path);
                     std::stringstream ss;
 
@@ -85,7 +86,7 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
                     return index_response;
                 });
 
-                route::segment_tree_node *bottom = m_route_segment_tree;
+                route::segment_tree_node *bottom = m_route_segment_tree_ptr;
 
                 for(const route::segment &segment : segments)
                 {
@@ -175,6 +176,11 @@ const std::filesystem::path &htpp::htpp::get_docroot() const
     return m_docroot;
 }
 
+const htpp::route::segment_tree_node *htpp::htpp::get_route_segment_tree_ptr() const
+{
+    return m_route_segment_tree_ptr;
+}
+
 void htpp::htpp::enqueue_dead_connection(client *dead_client)
 {
     m_dead_connecion_mutex.lock();
@@ -185,5 +191,5 @@ void htpp::htpp::enqueue_dead_connection(client *dead_client)
 
 htpp::htpp::~htpp()
 {
-    delete m_route_segment_tree;
+    delete m_route_segment_tree_ptr;
 }

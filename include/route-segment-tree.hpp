@@ -18,6 +18,7 @@ namespace htpp
 
         void set_handler_get(const handler &handler_get);
         void set_handler_get(const handler &&handler_get);
+        const handler *get_handler_get_ptr() const;
         ~segment_tree_node();
     };
 }

@@ -135,6 +135,11 @@ htpp::request::request(const std::string &message)
     }
 }
 
+const htpp::request::method &htpp::request::get_method() const
+{
+    return m_method;
+}
+
 const htpp::route &htpp::request::get_route() const
 {
     return m_route;

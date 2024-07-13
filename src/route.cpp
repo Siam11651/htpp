@@ -109,12 +109,17 @@ htpp::route::route(const std::string &route)
             }
             else
             {
-                m_healthy = false;
+                m_valid = false;
 
                 return;
             }
         }
     }
+}
+
+const std::vector<htpp::route::segment> &htpp::route::get_segments() const
+{
+    return m_segements;
 }
 
 const std::string htpp::route::get_path() const
