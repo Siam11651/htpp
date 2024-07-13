@@ -1,13 +1,28 @@
+#include <signal.h>
 #include <htpp.hpp>
+#include <iostream>
+
+htpp::htpp *server;
+
+void int_handler(int)
+{
+    delete server;
+
+    exit(0);
+}
 
 int main()
 {
-    htpp::htpp_builder server_builder;
-    server_builder.docroot = "/mnt/hdd/sources/htpp/docroot";
-    server_builder.port = 5173;
-    htpp::htpp server(server_builder);
+    signal(SIGINT, int_handler);
 
-    server.run();
+    {
+        htpp::htpp_builder server_builder;
+        server_builder.docroot = "/mnt/hdd/sources/htpp/docroot";
+        server_builder.port = 5173;
+        server = new htpp::htpp(server_builder);
+    }
+
+    server->run();
 
     return 0;
 }
