@@ -11,11 +11,21 @@ htpp::route::segment::segment()
 htpp::route::segment::segment(const std::string &name)
 {
     m_name = name;
+
+    if(name.empty())
+    {
+        m_variable = true;
+    }
 }
 
 const bool &htpp::route::segment::is_variable() const
 {
     return m_variable;
+}
+
+const std::string &htpp::route::segment::get_name() const
+{
+    return m_name;
 }
 
 const std::string htpp::route::s_segment_symbols("-._~!$&'()*+,;=");
@@ -90,7 +100,7 @@ htpp::route::route(const std::string &route)
         {
             if(is_valid_segment(segment_view))
             {
-                m_segements.push_back(std::string(segment_view.data(), segment_view.size()));
+                m_segements.push_back(route::segment(std::string(segment_view.data(), segment_view.size())));
             }
             else
             {
@@ -112,9 +122,9 @@ const std::string htpp::route::get_path() const
     {
         std::string to_return;
 
-        for(const std::string &segment : m_segements)
+        for(const segment &segment : m_segements)
         {
-            to_return += "/" + segment;
+            to_return += "/" + segment.get_name();
         }
 
         return to_return;

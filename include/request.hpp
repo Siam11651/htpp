@@ -3,6 +3,8 @@
 
 #include <route.hpp>
 #include <string>
+#include <map>
+#include <optional>
 
 namespace htpp
 {
@@ -27,6 +29,7 @@ namespace htpp
         std::string m_http_major;
         std::string m_http_minor;
         route m_route;
+        std::map<std::string, std::string> m_headers;
 
         bool is_interger(const std::string &query) const;
 
@@ -34,6 +37,7 @@ namespace htpp
         request(const std::string &message);
         const route &get_route() const;
         const bool is_valid() const;
+        const std::optional<std::string> get_header(const std::string &name) const;
     };
 }
 

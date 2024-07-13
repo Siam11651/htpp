@@ -144,3 +144,16 @@ const bool htpp::request::is_valid() const
 {
     return m_healthy;
 }
+
+const std::optional<std::string> htpp::request::get_header(const std::string &name) const
+{
+    std::optional<std::string> to_return;
+    std::map<std::string, std::string>::const_iterator found = m_headers.find(name);
+
+    if(found != m_headers.end())
+    {
+        to_return = found->second;
+    }
+
+    return to_return;
+}

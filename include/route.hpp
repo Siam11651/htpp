@@ -19,12 +19,13 @@ namespace htpp
             segment();
             segment(const std::string &name);
             const bool &is_variable() const;
+            const std::string &get_name() const;
         };
 
     private:
         static const std::string s_segment_symbols;
         bool m_healthy = true;
-        std::vector<std::string> m_segements;
+        std::vector<route::segment> m_segements;
         std::string m_query;
 
         bool is_valid_segment(const std::string_view &segment) const;
