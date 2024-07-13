@@ -9,3 +9,8 @@ add_library(htpp
     "src/route.cpp")
 target_include_directories(htpp PUBLIC "include")
 set_property(TARGET htpp PROPERTY CXX_STANDARD 20)
+add_executable(htpp-test-0
+    "tests/test-0.cpp")
+target_include_directories(htpp-test-0 PUBLIC "include")
+target_link_libraries(htpp-test-0 htpp)
+set_property(TARGET htpp-test-0 PROPERTY CXX_STANDARD 20)
