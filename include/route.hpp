@@ -12,12 +12,14 @@ namespace htpp
         class segment
         {
         private:
+            bool m_valid = true;
             bool m_variable = false;
             std::string m_name;
 
         public:
             segment();
             segment(const std::string &name);
+            const bool &is_valid() const;
             const bool &is_variable() const;
             const std::string &get_name() const;
         };

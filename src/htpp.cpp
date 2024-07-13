@@ -1,15 +1,24 @@
 #include <htpp.hpp>
 #include <client.hpp>
-#include <array>
-#include <iostream>
+#include <route.hpp>
+#include <handler.hpp>
 #include <sys/socket.h>
+#include <list>
+#include <array>
+#include <fstream>
+#include <iostream>
 
 htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
 {
     m_port = builder.port;
     m_max_listen_queue = builder.max_listen_queue;
     m_max_request_size = builder.max_request_size;
-    m_docroot = builder.docroot;
+
+    if(std::filesystem::is_directory(builder.docroot))
+    {
+        m_docroot = builder.docroot;
+    }
+
     m_socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     
     {
@@ -24,6 +33,58 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
 
     bind(m_socket_fd, (sockaddr *)&m_address, sizeof(m_address));
     listen(m_socket_fd, m_max_listen_queue);
+
+    if(std::filesystem::exists(m_docroot))
+    {
+        for(const std::filesystem::directory_entry &fs_entry : std::filesystem::recursive_directory_iterator(m_docroot))
+        {
+            if(std::filesystem::is_regular_file(fs_entry) && fs_entry.path().filename() == "index.html")
+            {
+                const std::filesystem::path relative_path = std::filesystem::relative(fs_entry, m_docroot);
+                const std::filesystem::path parent_path = relative_path.parent_path();
+                std::vector<route::segment> segments;
+
+                {
+                    std::list<route::segment> segments_list;
+
+                    for(std::filesystem::path::const_iterator it = parent_path.begin(); it != parent_path.end(); ++it)
+                    {
+                        route::segment new_segment(it->string());
+
+                        if(new_segment.is_valid())
+                        {
+                            segments_list.push_back(new_segment);
+                        }
+                    }
+
+                    segments.resize(segments_list.size());
+
+                    size_t next = 0;
+
+                    for(std::list<route::segment>::const_iterator it = segments_list.cbegin(); it != segments_list.cend(); ++it)
+                    {
+                        segments[next] = *it;
+                        ++next;
+                    }
+                }
+
+                handler index_handler(segments, [](const request &req) -> response
+                {
+                    std::filesystem::path index_path(req.get_route().get_path() + "/index.html");
+                    std::ifstream index_stream(index_path);
+                    std::stringstream ss;
+
+                    ss << index_stream.rdbuf();
+
+                    response index_response;
+                    index_response.content_type = "text/html";
+                    index_response.body = ss.str();
+
+                    return index_response;
+                });
+            }
+        }
+    }
 }
 
 void htpp::htpp::run()

@@ -18,6 +18,11 @@ htpp::route::segment::segment(const std::string &name)
     }
 }
 
+const bool &htpp::route::segment::is_valid() const
+{
+    return m_valid;
+}
+
 const bool &htpp::route::segment::is_variable() const
 {
     return m_variable;
