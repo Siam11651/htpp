@@ -8,6 +8,19 @@ namespace htpp
 {
     class route
     {
+    public:
+        class segment
+        {
+        private:
+            bool m_variable = false;
+            std::string m_name;
+
+        public:
+            segment();
+            segment(const std::string &name);
+            const bool &is_variable() const;
+        };
+
     private:
         static const std::string s_segment_symbols;
         bool m_healthy = true;

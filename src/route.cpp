@@ -3,6 +3,21 @@
 #include <ranges>
 #include <iostream>
 
+htpp::route::segment::segment()
+{
+    m_variable = true;
+}
+
+htpp::route::segment::segment(const std::string &name)
+{
+    m_name = name;
+}
+
+const bool &htpp::route::segment::is_variable() const
+{
+    return m_variable;
+}
+
 const std::string htpp::route::s_segment_symbols("-._~!$&'()*+,;=");
 
 bool htpp::route::is_valid_segment(const std::string_view &segment) const
