@@ -34,6 +34,8 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
     bind(m_socket_fd, (sockaddr *)&m_address, sizeof(m_address));
     listen(m_socket_fd, m_max_listen_queue);
 
+    m_route_segment_tree = new route::segment_tree_node();
+
     if(std::filesystem::exists(m_docroot))
     {
         for(const std::filesystem::directory_entry &fs_entry : std::filesystem::recursive_directory_iterator(m_docroot))
@@ -82,6 +84,29 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
 
                     return index_response;
                 });
+
+                route::segment_tree_node *bottom = m_route_segment_tree;
+
+                for(const route::segment &segment : segments)
+                {
+                    const std::string &segment_name = segment.get_name();
+                    std::map<std::string, route::segment_tree_node *>::const_iterator found = bottom->children.find(segment_name);
+
+                    if(found == bottom->children.end())
+                    {
+                        route::segment_tree_node *new_node = new route::segment_tree_node();
+
+                        bottom->children.insert({segment_name, new route::segment_tree_node()});
+
+                        bottom = new_node;
+                    }
+                    else
+                    {
+                        bottom = found->second;
+                    }
+                }
+
+                bottom->set_handler_get(std::move(index_handler));
             }
         }
     }
@@ -156,4 +181,9 @@ void htpp::htpp::enqueue_dead_connection(client *dead_client)
     m_dead_connections.push(dead_client);
     m_dead_connecion_mutex.unlock();
     m_cleaner_semaphore.release();
+}
+
+htpp::htpp::~htpp()
+{
+    delete m_route_segment_tree;
 }

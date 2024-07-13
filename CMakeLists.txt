@@ -6,7 +6,8 @@ add_library(htpp
     "src/htpp.cpp"
     "src/request.cpp"
     "src/response.cpp"
-    "src/route.cpp")
+    "src/route.cpp"
+    "src/route-segment-tree.cpp")
 target_include_directories(htpp PUBLIC "include")
 set_property(TARGET htpp PROPERTY CXX_STANDARD 20)
 

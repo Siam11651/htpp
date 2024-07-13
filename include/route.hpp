@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <functional>
 
 namespace htpp
 {
@@ -23,6 +25,8 @@ namespace htpp
             const bool &is_variable() const;
             const std::string &get_name() const;
         };
+
+        class segment_tree_node;
 
     private:
         static const std::string s_segment_symbols;
