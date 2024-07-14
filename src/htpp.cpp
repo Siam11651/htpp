@@ -8,6 +8,32 @@
 #include <fstream>
 #include <iostream>
 
+htpp::route::segment_tree_node *htpp::htpp::get_segment_tree_leaf(const std::vector<route::segment> &segments) const
+{
+    route::segment_tree_node *bottom = m_route_segment_tree_ptr;
+
+    for(const route::segment &segment : segments)
+    {
+        const std::string &segment_name = segment.get_name();
+        std::map<std::string, route::segment_tree_node *>::const_iterator found = bottom->children.find(segment_name);
+
+        if(found == bottom->children.end())
+        {
+            route::segment_tree_node *new_node = new route::segment_tree_node();
+
+            bottom->children.insert({segment_name, new route::segment_tree_node()});
+
+            bottom = new_node;
+        }
+        else
+        {
+            bottom = found->second;
+        }
+    }
+
+    return bottom;
+}
+
 htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
 {
     m_port = builder.port;
@@ -86,28 +112,7 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
                     return index_response;
                 });
 
-                route::segment_tree_node *bottom = m_route_segment_tree_ptr;
-
-                for(const route::segment &segment : segments)
-                {
-                    const std::string &segment_name = segment.get_name();
-                    std::map<std::string, route::segment_tree_node *>::const_iterator found = bottom->children.find(segment_name);
-
-                    if(found == bottom->children.end())
-                    {
-                        route::segment_tree_node *new_node = new route::segment_tree_node();
-
-                        bottom->children.insert({segment_name, new route::segment_tree_node()});
-
-                        bottom = new_node;
-                    }
-                    else
-                    {
-                        bottom = found->second;
-                    }
-                }
-
-                bottom->set_handler_get(std::move(index_handler));
+                register_request_handler(std::move(index_handler));
             }
         }
     }
@@ -115,14 +120,19 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
 
 void htpp::htpp::run()
 {
-    m_cleaner = std::thread([this]() -> void
+    m_cleaner_thread = std::thread([this]() -> void
     {
         while(true)
         {
             m_cleaner_semaphore.acquire();
             m_dead_connecion_mutex.lock();
 
-            if(m_dead_connections.size() > 0)
+            if(!m_run_cleaner)
+            {
+                break;
+            }
+
+            if(!m_dead_connections.empty())
             {
                 client *front = m_dead_connections.front();
 
@@ -181,6 +191,16 @@ const htpp::route::segment_tree_node *htpp::htpp::get_route_segment_tree_ptr() c
     return m_route_segment_tree_ptr;
 }
 
+void htpp::htpp::register_request_handler(const handler &req_handler)
+{
+    get_segment_tree_leaf(req_handler.get_segments())->set_handler_get(req_handler);
+}
+
+void htpp::htpp::register_request_handler(const handler &&req_handler)
+{
+    get_segment_tree_leaf(req_handler.get_segments())->set_handler_get(std::move(req_handler));
+}
+
 void htpp::htpp::enqueue_dead_connection(client *dead_client)
 {
     m_dead_connecion_mutex.lock();
@@ -191,5 +211,24 @@ void htpp::htpp::enqueue_dead_connection(client *dead_client)
 
 htpp::htpp::~htpp()
 {
+    m_dead_connecion_mutex.lock();
+
+    m_run_cleaner = false;
+
+    m_dead_connecion_mutex.unlock();
+    m_cleaner_semaphore.release();
+    m_cleaner_thread.join();
+
+    while(!m_dead_connections.empty())
+    {
+        client *front = m_dead_connections.front();
+
+        m_dead_connections.pop();
+
+        front->get_thread().join();
+
+        delete front;
+    }
+
     delete m_route_segment_tree_ptr;
 }

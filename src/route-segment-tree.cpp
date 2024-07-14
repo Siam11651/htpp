@@ -21,4 +21,9 @@ htpp::route::segment_tree_node::~segment_tree_node()
     delete m_handler_post;
     delete m_handler_put;
     delete m_handler_delete;
+
+    for(std::map<std::string, segment_tree_node *>::iterator it = children.begin(); it != children.end(); ++it)
+    {
+        delete it->second;
+    }
 }

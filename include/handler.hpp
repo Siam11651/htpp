@@ -19,6 +19,7 @@ namespace htpp
         handler(const handler &other);
         handler(const handler &&other);
         const response handle(const request &req) const;
+        const std::vector<route::segment> &get_segments() const;
     };
 }
 

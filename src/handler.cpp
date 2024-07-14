@@ -20,3 +20,8 @@ const htpp::response htpp::handler::handle(const request &req) const
 {
     return m_routine(req);
 }
+
+const std::vector<htpp::route::segment> &htpp::handler::get_segments() const
+{
+    return m_segments;
+}
