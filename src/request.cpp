@@ -1,6 +1,8 @@
 #include <request.hpp>
 #include <vector>
 #include <ranges>
+#include <algorithm>
+#include <sstream>
 #include <iostream>
 
 bool htpp::request::is_integer(const std::string &query) const
@@ -173,40 +175,63 @@ htpp::request::request(const std::string &message)
         }
     }
 
-    if(m_valid)
+    size_t next_start = request_line_end_pos + 2;
+    size_t content_length = 0;
+
+    for(; next_start < temp_message.size(); )
     {
-        size_t start = request_line_end_pos + 2;
+        size_t line_end_pos = temp_message.find("\r\n", next_start);
+        bool no_crlf_ending = false;
 
-        for(; start < temp_message.size(); )
+        if(line_end_pos == std::string::npos)
         {
-            size_t line_end_pos = temp_message.find("\r\n", start);
+            line_end_pos = temp_message.size();
+            no_crlf_ending = true;
+        }
 
-            if(line_end_pos == std::string::npos)
-            {
-                line_end_pos = temp_message.size();
-            }
+        if(next_start == line_end_pos)
+        {
+            next_start = line_end_pos + 2;
 
-            if(start >= line_end_pos)
-            {
-                break;
-            }
+            break;
+        }
 
-            const std::string_view line_view(temp_message.data() + start, line_end_pos - start);
-            const size_t colon_pos = line_view.find(":");
+        const std::string_view line_view(temp_message.data() + next_start, line_end_pos - next_start);
+        const size_t colon_pos = line_view.find(":");
 
-            if(colon_pos == std::string_view::npos)
-            {
-                m_valid = false;
+        if(colon_pos == std::string_view::npos)
+        {
+            m_valid = false;
 
-                return;
-            }
+            return;
+        }
 
-            const std::string_view header_name(trim_string_view(line_view.substr(0, colon_pos)));
-            const std::string_view header_value(trim_string_view(line_view.substr(colon_pos + 1)));
+        const std::string_view header_name_view(trim_string_view(line_view.substr(0, colon_pos)));
+        const std::string_view header_value_view(trim_string_view(line_view.substr(colon_pos + 1)));
+        std::string header_name(header_name_view.data(), header_name_view.size());
+        const std::string header_value(header_value_view.data(), header_value_view.size());
 
-            m_headers.insert({std::string(header_name.data(), header_name.size()), std::string(header_value.data(), header_value.size())});
+        std::transform(header_name.cbegin(), header_name.cend(), header_name.begin(), [](const char &c) -> char
+        {
+            return std::tolower(c);
+        });
+        m_headers.insert({header_name, header_value});
 
-            start = line_end_pos + 2;
+        if(header_name == "content-length")
+        {
+            std::stringstream ss;
+
+            ss << header_value;
+            ss >> content_length;
+        }
+
+        if(no_crlf_ending)
+        {
+            next_start = line_end_pos;
+        }
+        else
+        {
+            next_start = line_end_pos + 2;
         }
     }
 }

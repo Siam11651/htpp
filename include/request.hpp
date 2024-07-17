@@ -29,6 +29,7 @@ namespace htpp
         std::string m_http_minor;
         route m_route;
         std::map<std::string, std::string> m_headers;
+        std::string m_body;
 
         bool is_integer(const std::string &query) const;
         const std::string_view trim_string_view(const std::string_view &str) const;
