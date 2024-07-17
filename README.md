@@ -13,6 +13,7 @@ https://github.com/user-attachments/assets/6a164ae2-23a2-40e5-96dd-6ce20b47a50f
 - webp 🤡
 
 ## TODO:
+- cookies 🤪
 - Request handlers
     - OPTIONS, TRACE and CONNECT method handler remains 😭
 - Support more files

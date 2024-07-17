@@ -21,7 +21,7 @@ htpp::route::segment_tree_node *htpp::htpp::get_segment_tree_leaf(const std::vec
         {
             route::segment_tree_node *new_node = new route::segment_tree_node();
 
-            bottom->children.insert({segment_name, new route::segment_tree_node()});
+            bottom->children.insert({segment_name, new_node});
 
             bottom = new_node;
         }

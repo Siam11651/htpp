@@ -16,7 +16,7 @@ htpp::client::client(htpp &server, const int32_t &socket_fd) : m_server(server)
 void htpp::client::run()
 {
     m_handler = std::thread([this]() -> void
-                            {
+    {
         while(true)
         {
             pollfd socket_poll;
@@ -148,6 +148,18 @@ const htpp::handler *htpp::client::extract_handler(const request::method &method
     if(method == request::method::GET)
     {
         return bottom->get_handler_get_ptr();
+    }
+    else if(method == request::method::POST)
+    {
+        return bottom->get_handler_post_ptr();
+    }
+    else if(method == request::method::PUT)
+    {
+        return bottom->get_handler_put_ptr();
+    }
+    else if(method == request::method::DELETE)
+    {
+        return bottom->get_handler_delete_ptr();
     }
     else
     {

@@ -22,6 +22,20 @@ int main()
         server = new htpp::htpp(server_builder);
     }
 
+    server->register_request_handler(std::move(htpp::handler(
+    {
+        htpp::route::segment("abc"),
+        htpp::route::segment("def"),
+        htpp::route::segment(),
+        htpp::route::segment("ghi")
+    }, [](const htpp::request &req) -> htpp::response
+    {
+        htpp::response http_response;
+        http_response.body = "hehe";
+
+        return http_response;
+    })), htpp::request::method::POST);
+
     server->run();
 
     return 0;
