@@ -3,6 +3,8 @@
 #include <ranges>
 #include <iostream>
 
+const std::string htpp::route::segment::s_segment_symbols("-._~!$&'()*+,;=");
+
 htpp::route::segment::segment()
 {
     m_variable = true;
@@ -12,7 +14,40 @@ htpp::route::segment::segment(const std::string &name)
 {
     m_name = name;
 
-    if(name.empty())
+    const size_t &size = name.size();
+
+    for(size_t i = 0; i < size; ++i)
+    {
+        const char &c = name[i];
+
+        if(c == '%')
+        {
+            if(i + 2 < size)
+            {
+                for(size_t j = i + 1; j <= i + 2; ++j)
+                {
+                    const char &c1 = name[i + j];
+
+                    if(!('0' <= c1 && c1 <= '9') && !('A' <= c1 && c1 <= 'F') && !('a' <= c1 && c1 <= 'f'))
+                    {
+                        m_valid = false;
+
+                        break;
+                    }
+                }                
+            }
+            else
+            {
+                m_valid = false;
+            }
+        }
+        else if(!('0' <= c && c <= '9') && !('A' <= c && c <= 'Z') && !('a' <= c && c <= 'z') && s_segment_symbols.find(c) == std::string::npos)
+        {
+            m_valid = false;
+        }
+    }
+
+    if(m_valid && name.empty())
     {
         m_variable = true;
     }
@@ -31,44 +66,6 @@ const bool &htpp::route::segment::is_variable() const
 const std::string &htpp::route::segment::get_name() const
 {
     return m_name;
-}
-
-const std::string htpp::route::s_segment_symbols("-._~!$&'()*+,;=");
-
-bool htpp::route::is_valid_segment(const std::string_view &segment) const
-{
-    const size_t &size = segment.size();
-
-    for(size_t i = 0; i < size; ++i)
-    {
-        const char &c = segment[i];
-
-        if(c == '%')
-        {
-            if(i + 2 < size)
-            {
-                for(size_t j = i + 1; j <= i + 2; ++j)
-                {
-                    const char &c1 = segment[i + j];
-
-                    if(!('0' <= c1 && c1 <= '9') && !('A' <= c1 && c1 <= 'F') && !('a' <= c1 && c1 <= 'f'))
-                    {
-                        return false;
-                    }
-                }                
-            }
-            else
-            {
-                return false;
-            }
-        }
-        else if(!('0' <= c && c <= '9') && !('A' <= c && c <= 'Z') && !('a' <= c && c <= 'z') && s_segment_symbols.find(c) == std::string::npos)
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 htpp::route::route(const std::string &route)
@@ -103,9 +100,11 @@ htpp::route::route(const std::string &route)
 
         if(!segment_view.empty())
         {
-            if(is_valid_segment(segment_view))
+            const route::segment new_segment(std::string(segment.data(), segment.size()));
+
+            if(new_segment.is_valid())
             {
-                m_segements.push_back(route::segment(std::string(segment_view.data(), segment_view.size())));
+                m_segements.push_back(std::move(new_segment));
             }
             else
             {

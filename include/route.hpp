@@ -14,6 +14,7 @@ namespace htpp
         class segment
         {
         private:
+            static const std::string s_segment_symbols;
             bool m_valid = true;
             bool m_variable = false;
             std::string m_name;
@@ -29,12 +30,9 @@ namespace htpp
         class segment_tree_node;
 
     private:
-        static const std::string s_segment_symbols;
         bool m_valid = true;
         std::vector<route::segment> m_segements;
         std::string m_query;
-
-        bool is_valid_segment(const std::string_view &segment) const;
     
     public:
         route(const std::string &route = "*");
