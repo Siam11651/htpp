@@ -17,6 +17,8 @@ namespace htpp
         client(htpp &server, const int32_t &socket_fd);
         void run();
         std::thread &get_thread();
+        const handler *extract_handler(const request::method &method, const std::vector<route::segment> &segments) const;
+        void handle_response(const request &http_request, const handler *request_handler) const;
     };
 }
 
