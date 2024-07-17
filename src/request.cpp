@@ -1,8 +1,9 @@
 #include <request.hpp>
 #include <vector>
 #include <ranges>
+#include <iostream>
 
-bool htpp::request::is_interger(const std::string &query) const
+bool htpp::request::is_integer(const std::string &query) const
 {
     if(query.size() == 0)
     {
@@ -20,6 +21,44 @@ bool htpp::request::is_interger(const std::string &query) const
     return true;
 }
 
+const std::string_view htpp::request::trim_string_view(const std::string_view &str) const
+{
+    size_t left_last_ws = std::string_view::npos;
+
+    for(size_t i = 0; i < str.size(); ++i)
+    {
+        const char &c = str[i];
+
+        if(c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r' || c == ' ')
+        {
+            left_last_ws = i;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    std::string_view to_return = str.substr(left_last_ws + 1);
+    size_t right_first_ws = to_return.size();
+
+    for(size_t i = to_return.size() - 1; i != std::string::npos; --i)
+    {
+        const char &c = to_return[i];
+
+        if(c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r' || c == ' ')
+        {
+            right_first_ws = i;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return to_return.substr(0, right_first_ws);
+}
+
 htpp::request::request(const std::string &message)
 {
     std::string temp_message(message);
@@ -27,7 +66,7 @@ htpp::request::request(const std::string &message)
 
     if(request_line_end_pos == std::string::npos)
     {
-        m_healthy = false;
+        m_valid = false;
 
         return;
     }
@@ -42,7 +81,7 @@ htpp::request::request(const std::string &message)
         {
             if(next_component == 3)
             {
-                m_healthy = false;
+                m_valid = false;
 
                 return;
             }
@@ -53,7 +92,7 @@ htpp::request::request(const std::string &message)
 
         if(next_component < 3)
         {
-            m_healthy = false;
+            m_valid = false;
 
             return;
         }
@@ -89,7 +128,7 @@ htpp::request::request(const std::string &message)
     }
     else
     {
-        m_healthy = false;
+        m_valid = false;
 
         return;
     }
@@ -101,7 +140,7 @@ htpp::request::request(const std::string &message)
 
         if(version_slash_pos == std::string::npos)
         {
-            m_healthy = false;
+            m_valid = false;
 
             return;
         }
@@ -110,27 +149,64 @@ htpp::request::request(const std::string &message)
 
         if(version_dot_pos == std::string::npos)
         {
-            m_healthy = false;
+            m_valid = false;
 
             return;
         }
 
         m_http_major = request_line_components[2].substr(version_slash_pos + 1, version_dot_pos - version_slash_pos - 1);
         
-        if(!is_interger(m_http_major))
+        if(!is_integer(m_http_major))
         {
-            m_healthy = false;
+            m_valid = false;
 
             return;
         }
 
         m_http_minor = request_line_components[2].substr(version_dot_pos + 1);
 
-        if(!is_interger(m_http_minor))
+        if(!is_integer(m_http_minor))
         {
-            m_healthy = false;
+            m_valid = false;
 
             return;
+        }
+    }
+
+    if(m_valid)
+    {
+        size_t start = request_line_end_pos + 2;
+
+        for(; start < temp_message.size(); )
+        {
+            size_t line_end_pos = temp_message.find("\r\n", start);
+
+            if(line_end_pos == std::string::npos)
+            {
+                line_end_pos = temp_message.size();
+            }
+
+            if(start >= line_end_pos)
+            {
+                break;
+            }
+
+            const std::string_view line_view(temp_message.data() + start, line_end_pos - start);
+            const size_t colon_pos = line_view.find(":");
+
+            if(colon_pos == std::string_view::npos)
+            {
+                m_valid = false;
+
+                return;
+            }
+
+            const std::string_view header_name(trim_string_view(line_view.substr(0, colon_pos)));
+            const std::string_view header_value(trim_string_view(line_view.substr(colon_pos + 1)));
+
+            m_headers.insert({std::string(header_name.data(), header_name.size()), std::string(header_value.data(), header_value.size())});
+
+            start = line_end_pos + 2;
         }
     }
 }
@@ -147,18 +223,10 @@ const htpp::route &htpp::request::get_route() const
 
 const bool htpp::request::is_valid() const
 {
-    return m_healthy;
+    return m_valid;
 }
 
-const std::optional<std::string> htpp::request::get_header(const std::string &name) const
+const std::map<std::string, std::string> &htpp::request::get_headers() const
 {
-    std::optional<std::string> to_return;
-    std::map<std::string, std::string>::const_iterator found = m_headers.find(name);
-
-    if(found != m_headers.end())
-    {
-        to_return = found->second;
-    }
-
-    return to_return;
+    return m_headers;
 }

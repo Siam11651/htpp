@@ -30,6 +30,13 @@ int main()
         htpp::route::segment("ghi")
     }, [](const htpp::request &req) -> htpp::response
     {
+        const std::map<std::string, std::string> &headers = req.get_headers();
+
+        for(std::map<std::string, std::string>::const_iterator it0 = headers.begin(); it0 != headers.end(); ++it0)
+        {
+            std::cout << it0->first << " " << it0->second << std::endl;
+        }
+
         htpp::response http_response;
         http_response.body = "hehe";
 
