@@ -112,7 +112,7 @@ htpp::htpp::htpp(const htpp_builder &builder) : m_cleaner_semaphore(0)
                     return index_response;
                 });
 
-                register_request_handler(std::move(index_handler));
+                register_request_handler(std::move(index_handler), request::method::GET);
             }
         }
     }
@@ -191,14 +191,62 @@ const htpp::route::segment_tree_node *htpp::htpp::get_route_segment_tree_ptr() c
     return m_route_segment_tree_ptr;
 }
 
-void htpp::htpp::register_request_handler(const handler &req_handler)
+void htpp::htpp::register_request_handler(const handler &req_handler, const request::method &req_method)
 {
-    get_segment_tree_leaf(req_handler.get_segments())->set_handler_get(req_handler);
+    if(!req_handler.is_valid())
+    {
+        return;
+    }
+
+    if(req_method == request::method::GET)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_get(req_handler);
+    }
+    else if(req_method == request::method::POST)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_post(req_handler);
+    }
+    else if(req_method == request::method::PUT)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_put(req_handler);
+    }
+    else if(req_method == request::method::DELETE)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_delete(req_handler);
+    }
+    else
+    {
+        // handle later
+    }
 }
 
-void htpp::htpp::register_request_handler(const handler &&req_handler)
+void htpp::htpp::register_request_handler(const handler &&req_handler, const request::method &req_method)
 {
-    get_segment_tree_leaf(req_handler.get_segments())->set_handler_get(std::move(req_handler));
+    if(!req_handler.is_valid())
+    {
+        return;
+    }
+
+    if(req_method == request::method::GET)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_get(std::move(req_handler));
+    }
+    else if(req_method == request::method::POST)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_post(std::move(req_handler));
+    }
+    else if(req_method == request::method::PUT)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_put(std::move(req_handler));
+    }
+    else if(req_method == request::method::DELETE)
+    {
+        get_segment_tree_leaf(req_handler.get_segments())->set_handler_delete(std::move(req_handler));
+    }
+    else
+    {
+        // handle later
+    }
 }
 
 void htpp::htpp::enqueue_dead_connection(client *dead_client)

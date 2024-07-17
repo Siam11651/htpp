@@ -49,8 +49,8 @@ namespace htpp
         const size_t &get_max_request_size() const;
         const std::filesystem::path &get_docroot() const;
         const route::segment_tree_node *get_route_segment_tree_ptr() const;
-        void register_request_handler(const handler &req_handler);
-        void register_request_handler(const handler &&req_handler);
+        void register_request_handler(const handler &req_handler, const request::method &req_method);
+        void register_request_handler(const handler &&req_handler, const request::method &req_method);
         void enqueue_dead_connection(client *dead_client);
         ~htpp();
     };

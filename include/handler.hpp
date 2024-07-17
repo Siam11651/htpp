@@ -11,8 +11,11 @@ namespace htpp
     class handler
     {
     private:
+        bool m_valid = true;
         std::vector<route::segment> m_segments;
         std::function<const response(const request &)> m_routine;
+
+        const bool has_valid_segments() const;
 
     public:
         handler(const std::vector<route::segment> &segments, const std::function<const response(const request &)> &routine);
@@ -20,6 +23,7 @@ namespace htpp
         handler(const handler &&other);
         const response handle(const request &req) const;
         const std::vector<route::segment> &get_segments() const;
+        const bool &is_valid() const;
     };
 }
 
