@@ -234,6 +234,11 @@ htpp::request::request(const std::string &message)
             next_start = line_end_pos + 2;
         }
     }
+
+    if(content_length > 0)
+    {
+        m_body = temp_message.substr(next_start, content_length);
+    }
 }
 
 const htpp::request::method &htpp::request::get_method() const
@@ -254,4 +259,14 @@ const bool htpp::request::is_valid() const
 const std::map<std::string, std::string> &htpp::request::get_headers() const
 {
     return m_headers;
+}
+
+const std::string &htpp::request::get_body() const
+{
+    return m_body;
+}
+
+const std::vector<std::string> &htpp::request::get_params() const
+{
+    return m_params;
 }

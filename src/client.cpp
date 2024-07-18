@@ -1,5 +1,5 @@
 #include <client.hpp>
-#include <request.hpp>
+#include <htpp.hpp>
 #include <unistd.h>
 #include <poll.h>
 #include <functional>
@@ -31,7 +31,7 @@ void htpp::client::run()
                 read(m_socket_fd, request_buffer, max_request_size - 1);
 
                 request_buffer[max_request_size - 1] = '\0';
-                request http_request(request_buffer);
+                request http_request(std::string(request_buffer, max_request_size));
 
                 if(!http_request.is_valid())
                 {
@@ -94,7 +94,7 @@ void htpp::client::run()
                 }
                 else
                 {
-                    const handler *http_handler = extract_handler(http_request.get_method(), http_request.get_route().get_segments());
+                    const handler *http_handler = extract_handler(http_request, http_request.get_route().get_segments());
 
                     handle_response(http_request, http_handler);
                 }
@@ -114,7 +114,7 @@ std::thread &htpp::client::get_thread()
     return m_handler;
 }
 
-const htpp::handler *htpp::client::extract_handler(const request::method &method, const std::vector<route::segment> &segments) const
+const htpp::handler *htpp::client::extract_handler(request &req, const std::vector<route::segment> &segments) const
 {
     const route::segment_tree_node *bottom = m_server.get_route_segment_tree_ptr();
 
@@ -128,6 +128,7 @@ const htpp::handler *htpp::client::extract_handler(const request::method &method
 
             if(var_found == bottom->children.end())
             {
+                // could not match neither fixed segment or variable segment
                 response response404;
                 response404.status_code = 404;
                 const std::string serialized_response = response404.serialize();
@@ -136,14 +137,19 @@ const htpp::handler *htpp::client::extract_handler(const request::method &method
             }
             else
             {
+                // variable segment
+                req.m_params.push_back(segments[i].get_name());
                 bottom = var_found->second;
             }
         }
         else
         {
+            // matched fixed segment
             bottom = found->second;
         }
     }
+
+    const request::method &method = req.get_method();
 
     if(method == request::method::GET)
     {

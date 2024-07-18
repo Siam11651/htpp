@@ -1,10 +1,15 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <htpp.hpp>
+#include <route.hpp>
+#include <thread>
 
 namespace htpp
 {
+    class htpp;
+    class request;
+    class handler;
+
     class client
     {
     private:
@@ -17,7 +22,7 @@ namespace htpp
         client(htpp &server, const int32_t &socket_fd);
         void run();
         std::thread &get_thread();
-        const handler *extract_handler(const request::method &method, const std::vector<route::segment> &segments) const;
+        const handler *extract_handler(request &req, const std::vector<route::segment> &segments) const;
         void handle_response(const request &http_request, const handler *request_handler) const;
     };
 }

@@ -37,6 +37,13 @@ int main()
             std::cout << it0->first << " " << it0->second << std::endl;
         }
 
+        std::cout << std::endl << req.get_body() << std::endl << std::endl;
+
+        for(const std::string &param : req.get_params())
+        {
+            std::cout << param << std::endl;
+        }
+
         htpp::response http_response;
         http_response.body = "hehe";
 
