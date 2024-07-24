@@ -2,6 +2,7 @@
 #define REQUEST_H
 
 #include <client.hpp>
+#include <cookies.hpp>
 #include <route.hpp>
 #include <string>
 #include <map>
@@ -33,13 +34,14 @@ namespace htpp
         route m_route;
         std::vector<std::string> m_params;
         std::map<std::string, std::string> m_headers;
+        cookies m_cookies;
         std::string m_body;
 
         bool is_integer(const std::string &query) const;
         const std::string_view trim_string_view(const std::string_view &str) const;
 
     public:
-        request(const std::string &message);
+        request(const std::string_view &message);
         const method &get_method() const;
         const route &get_route() const;
         const bool is_valid() const;

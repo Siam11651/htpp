@@ -1,4 +1,5 @@
 #include <request.hpp>
+#include <string-view.hpp>
 #include <vector>
 #include <ranges>
 #include <algorithm>
@@ -61,9 +62,9 @@ const std::string_view htpp::request::trim_string_view(const std::string_view &s
     return to_return.substr(0, right_first_ws);
 }
 
-htpp::request::request(const std::string &message)
+htpp::request::request(const std::string_view &message)
 {
-    std::string temp_message(message);
+    std::string_view temp_message(message);
     const size_t request_line_end_pos = temp_message.find("\r\n");
 
     if(request_line_end_pos == std::string::npos)
@@ -206,23 +207,32 @@ htpp::request::request(const std::string &message)
             return;
         }
 
-        const std::string_view header_name_view(trim_string_view(line_view.substr(0, colon_pos)));
-        const std::string_view header_value_view(trim_string_view(line_view.substr(colon_pos + 1)));
-        std::string header_name(header_name_view.data(), header_name_view.size());
-        const std::string header_value(header_value_view.data(), header_value_view.size());
+        string_view header_name_view(line_view.substr(0, colon_pos));
+        string_view header_value_view(line_view.substr(colon_pos + 1));
+        std::string header_name;
 
+        header_name_view.trim();
+        header_value_view.trim();
         std::transform(header_name.cbegin(), header_name.cend(), header_name.begin(), [](const char &c) -> char
         {
             return std::tolower(c);
         });
-        m_headers.insert({header_name, header_value});
 
-        if(header_name == "content-length")
+        if(header_name == "set-cookie")
         {
-            std::stringstream ss;
+            m_cookies.parse(header_value_view);
+        }
+        else
+        {
+            m_headers.insert({header_name, std::string(header_value_view.data(), header_value_view.size())});
 
-            ss << header_value;
-            ss >> content_length;
+            if(header_name == "content-length")
+            {
+                std::stringstream ss;
+
+                ss << header_value_view;
+                ss >> content_length;
+            }
         }
 
         if(no_crlf_ending)
