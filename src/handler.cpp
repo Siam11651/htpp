@@ -43,7 +43,7 @@ htpp::handler::handler(const handler &&other) : m_segments(std::move(other.m_seg
     }
 }
 
-const htpp::response htpp::handler::handle(const request &req) const
+htpp::response htpp::handler::handle(const request &req) const
 {
     return m_routine(req);
 }

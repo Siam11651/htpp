@@ -24,44 +24,6 @@ bool htpp::request::is_integer(const std::string &query) const
     return true;
 }
 
-const std::string_view htpp::request::trim_string_view(const std::string_view &str) const
-{
-    size_t left_last_ws = std::string_view::npos;
-
-    for(size_t i = 0; i < str.size(); ++i)
-    {
-        const char &c = str[i];
-
-        if(c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r' || c == ' ')
-        {
-            left_last_ws = i;
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    std::string_view to_return = str.substr(left_last_ws + 1);
-    size_t right_first_ws = to_return.size();
-
-    for(size_t i = to_return.size() - 1; i != std::string::npos; --i)
-    {
-        const char &c = to_return[i];
-
-        if(c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r' || c == ' ')
-        {
-            right_first_ws = i;
-        }
-        else
-        {
-            break;
-        }
-    }
-
-    return to_return.substr(0, right_first_ws);
-}
-
 htpp::request::request(const std::string_view &message)
 {
     std::string_view temp_message(message);
@@ -261,7 +223,7 @@ const htpp::route &htpp::request::get_route() const
     return m_route;
 }
 
-const bool htpp::request::is_valid() const
+const bool &htpp::request::is_valid() const
 {
     return m_valid;
 }

@@ -37,7 +37,7 @@ namespace htpp
     public:
         route(const std::string &route = "*");
         const std::vector<segment> &get_segments() const;
-        const std::string get_path() const;
+        std::string get_path() const;
     };
 }
 

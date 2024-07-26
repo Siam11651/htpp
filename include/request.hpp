@@ -38,13 +38,12 @@ namespace htpp
         std::string m_body;
 
         bool is_integer(const std::string &query) const;
-        const std::string_view trim_string_view(const std::string_view &str) const;
 
     public:
         request(const std::string_view &message);
         const method &get_method() const;
         const route &get_route() const;
-        const bool is_valid() const;
+        const bool &is_valid() const;
         const std::map<std::string, std::string> &get_headers() const;
         const std::string &get_body() const;
         const std::vector<std::string> &get_params() const;

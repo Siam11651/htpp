@@ -121,7 +121,7 @@ const std::vector<htpp::route::segment> &htpp::route::get_segments() const
     return m_segements;
 }
 
-const std::string htpp::route::get_path() const
+std::string htpp::route::get_path() const
 {
     if(m_segements.empty())
     {

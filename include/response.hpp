@@ -17,7 +17,7 @@ namespace htpp
         std::string content_type = "application/octet-stream";
         std::string body;
 
-        const std::string serialize() const;
+        std::string serialize() const;
     };
 }
 

@@ -67,7 +67,7 @@ const std::map<uint16_t, std::string> htpp::response::s_status_map =
     {511, "Network Authentication Required"}
 };
 
-const std::string htpp::response::serialize() const
+std::string htpp::response::serialize() const
 {
     time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     std::stringstream response_stream;
